@@ -18,16 +18,16 @@ func init() {
 func WalkDirs (dirNames string) int64{
 
 	dirs := strings.Split(dirNames, ",")
-
+	fmt.Println("Cantida de Gorutinas:", len(dirs))
 	var wg sync.WaitGroup
 	wg.Add(len(dirs))
 
 	size := make(chan int64)
 
-	for i , dirName :=range dirs {
+	for _, dirName :=range dirs {
 		fmt.Println(dirName)
 		go func() {
-			fmt.Println("Lanzo Gorutina", i + 1)
+			fmt.Println("Lanzo Gorutina para dir: ", dirName)
 			walk(dirName, size)
 			wg.Done()
 		}()
