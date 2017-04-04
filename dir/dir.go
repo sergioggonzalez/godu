@@ -15,7 +15,7 @@ func init() {
 	runtime.GOMAXPROCS(1)
 }
 
-func WalkDirs (dirNames string) int64{
+func WalkDirs (dirNames string) {
 
 	dirs := strings.Split(dirNames, ",")
 	fmt.Println("Cantida de Gorutinas:", len(dirs))
@@ -25,26 +25,34 @@ func WalkDirs (dirNames string) int64{
 	size := make(chan int64)
 
 	for _, dirName :=range dirs {
-		fmt.Println(dirName)
-		go func() {
+		go func(dirName string, size chan int64) {
 			fmt.Println("Lanzo Gorutina para dir: ", dirName)
 			walk(dirName, size)
 			wg.Done()
-		}()
-	}
-	var total int64
-	for s := range size {
-		total += s
+		}(dirName, size)
 	}
 
+
+
+	var total int64
+	go func(size chan int64){
+		fmt.Println("Lanzo Gorutina final ")
+		for s := range size {
+			total += s
+		}
+	}(size)
+
+	// Wait for the goroutines to finish.
+	fmt.Println("Waiting To Finish")
 	wg.Wait()
+
 	close(size)
-	return total
+	fmt.Println("Finaliza ejecucion de gorutinas!")
+	fmt.Printf("%.2f GB\n", float32(total)/1e9)
 }
 
 
 func walk(dir string, size chan int64) {
-	fmt.Println(dir);
 	for _, entry := range dirents(dir) {
 		if entry.IsDir() {
 			subdir := filepath.Join(dir, entry.Name())
@@ -53,7 +61,6 @@ func walk(dir string, size chan int64) {
 			size <- entry.Size()
 		}
 	}
-
 }
 
 func dirents(dir string) []os.FileInfo {
@@ -64,3 +71,5 @@ func dirents(dir string) []os.FileInfo {
 	return dirFiles
 
 }
+
+
