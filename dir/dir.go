@@ -25,22 +25,22 @@ func WalkDirs (dirNames string) {
 	size := make(chan int64)
 
 	for _, dirName :=range dirs {
-		go func(dirName string, size chan int64) {
+		go func(dirName string) {
 			fmt.Println("Lanzo Gorutina para dir: ", dirName)
 			walk(dirName, size)
 			wg.Done()
-		}(dirName, size)
+		}(dirName)
 	}
 
 
 
 	var total int64
-	go func(size chan int64){
+	go func(){
 		fmt.Println("Lanzo Gorutina final ")
 		for s := range size {
 			total += s
 		}
-	}(size)
+	}()
 
 	// Wait for the goroutines to finish.
 	fmt.Println("Waiting To Finish")
